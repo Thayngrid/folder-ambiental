@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<title>Mapas e Estudos Ambientais</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Conceito: folder em formato de livro. Capa verde, páginas de papel creme, curvas de nível como motivo. Virada de página 3D no desktop, páginas empilhadas no celular. */
+:root{
+  --page-bg:#DADFD5; --page-fg:#14231C; --page-muted:#4A5A51;
+  --btn-bg:#1F4D3A; --btn-fg:#F5F2E8; --focus:#14231C;
+  --paper:#F5F2E8; --paper-2:#E9E4D2; --paper-ink:#14231C; --paper-soft:#2B3A32; --paper-muted:#5B6A61; --paper-rule:#C9C2AC;
+  --green:#1F4D3A; --green-line:#3E7A60; --on-green:#F5F2E8; --on-green-soft:#DCE6DF;
+  --amber:#E8A25B; --amber-ink:#8A4B12;
+  --wa:#0F7A40; --wa-fg:#FFFFFF;
+  --shade:rgba(20,35,28,.22); --shadow:rgba(20,35,28,.30);
+  --font-display:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page-bg:#0E1813; --page-fg:#E6EDE8; --page-muted:#A3B3AA;
+    --btn-bg:#E8A25B; --btn-fg:#14231C; --focus:#E6EDE8;
+    --shadow:rgba(0,0,0,.65);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page-bg:#0E1813; --page-fg:#E6EDE8; --page-muted:#A3B3AA;
+  --btn-bg:#E8A25B; --btn-fg:#14231C; --focus:#E6EDE8;
+  --shadow:rgba(0,0,0,.65);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--page-bg); color:var(--page-fg); font-family:var(--font-body);
+  min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px;
+  padding-block:28px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.stage{position:relative; width:100%; display:flex; justify-content:center; min-width:0}
+
+/* ---- Livro (desktop) ---- */
+.book{
+  --pw:min(44vw, 500px, calc((100svh - 200px) / 1.4));
+  --ph:calc(var(--pw) * 1.4);
+  position:relative; width:calc(var(--pw) * 2); height:var(--ph);
+  perspective:2600px;
+  transition:transform .9s cubic-bezier(.45,.05,.25,1);
+}
+.book.is-closed{transform:translateX(-25%)}
+.leaf{
+  position:absolute; top:0; left:50%; width:var(--pw); height:100%;
+  transform-style:preserve-3d; transform-origin:left center;
+  transition:transform .9s cubic-bezier(.45,.05,.25,1);
+}
+.leaf.flipped{transform:rotateY(-180deg)}
+.face{
+  position:absolute; inset:0; overflow:hidden;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  container-type:inline-size;
+  background:var(--paper); color:var(--paper-ink); font-family:var(--font-body);
+  box-shadow:0 14px 34px var(--shadow);
+}
+.front{border-radius:0 5px 5px 0}
+.back{transform:rotateY(180deg); border-radius:5px 0 0 5px; background:var(--paper-2)}
+.face::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:2}
+.front::after{background:linear-gradient(to right, var(--shade), rgba(20,35,28,0) 9%)}
+.back::after{background:linear-gradient(to left, var(--shade), rgba(20,35,28,0) 9%)}
+.face.endcover{inset:auto; left:50%; top:0; width:var(--pw); height:100%; z-index:0; border-radius:0 5px 5px 0}
+.face.endcover::after{background:linear-gradient(to right, var(--shade), rgba(20,35,28,0) 9%)}
+.on-green{background:var(--green); color:var(--on-green)}
+
+.inner{
+  position:relative; z-index:1; width:100%; height:100%;
+  padding:8.5cqw 8cqw 11cqw;
+  display:flex; flex-direction:column; gap:1.1em;
+  font-size:clamp(13px, 3.3cqw, 18px); line-height:1.45;
+}
+.folio{
+  position:absolute; bottom:4.5cqw; z-index:1;
+  font-size:clamp(11px, 2.6cqw, 14px); font-weight:500; letter-spacing:.06em; line-height:1;
+  color:var(--paper-muted); font-variant-numeric:tabular-nums;
+}
+.folio.l{left:8cqw}
+.folio.r{right:8cqw}
+
+.kicker{font-size:.8em; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--amber-ink); line-height:1.3}
+.on-green .kicker{color:var(--amber)}
+h1,h2{margin:0; font-family:var(--font-display); font-weight:700; text-wrap:balance}
+h2{font-size:1.85em; line-height:1.1; color:var(--green)}
+h1{font-size:2.55em; line-height:1.06}
+p{margin:0}
+ul,ol{margin:0; padding:0; list-style:none}
+.rows{display:flex; flex-direction:column}
+.rows li{padding:.85em 0; border-top:1px solid var(--paper-rule)}
+.rows li:last-child{border-bottom:1px solid var(--paper-rule)}
+.why li{display:flex; flex-direction:column; gap:.2em}
+.why strong{font-weight:600; font-size:1.05em}
+.why span{color:var(--paper-soft); font-size:.95em}
+.services li{display:flex; gap:.8em; align-items:baseline}
+.services li::before{content:""; flex:none; width:.5em; height:.5em; border-radius:50%; background:var(--amber-ink); transform:translateY(-.05em)}
+.steps{display:flex; flex-direction:column; gap:.95em}
+.steps li{display:flex; gap:.8em; align-items:baseline}
+.steps .n{flex:none; width:1.1em; font-family:var(--font-display); font-weight:700; font-size:1.4em; line-height:1; color:var(--amber-ink)}
+.quote{border:1.5px solid var(--green); padding:1em 1.1em; display:flex; flex-direction:column; gap:.3em; margin-top:auto}
+.quote b{font-family:var(--font-display); font-size:1.3em; line-height:1.15; color:var(--green)}
+.quote span{color:var(--paper-soft); font-size:.95em}
+.lead{color:var(--paper-soft)}
+.contour{position:absolute; left:0; bottom:0; width:100%; height:62%; z-index:0}
+.contour path{fill:none; stroke:var(--green-line); stroke-width:1.2}
+.contour circle{fill:var(--amber)}
+.sub{color:var(--on-green-soft); font-size:1.08em}
+.who{margin-top:auto; display:flex; flex-direction:column; gap:.15em}
+.who b{font-family:var(--font-display); font-size:1.25em; line-height:1.2}
+.who span{font-size:.92em; opacity:.92}
+.who.rule{padding-top:1em; border-top:1px solid var(--paper-rule)}
+.contact-list{display:flex; flex-direction:column; gap:.9em}
+.contact-list div{display:flex; flex-direction:column; gap:.1em}
+.contact-list dt{font-size:.8em; font-weight:600; color:var(--paper-muted)}
+.contact-list dd{margin:0; font-size:1.1em; font-weight:500; overflow-wrap:anywhere}
+.contact-list .sel{user-select:all}
+.wa{
+  align-self:flex-start; display:inline-flex; align-items:center; gap:.65em;
+  min-height:48px; padding:.8em 1.25em; border-radius:4px;
+  background:var(--wa); color:var(--wa-fg); text-decoration:none;
+  font-size:1.05em; font-weight:600; line-height:1.2;
+}
+.wa:hover{filter:brightness(1.12)}
+.wa svg{width:1.4em; height:1.4em; flex:none}
+.wa:focus-visible,.nav:focus-visible{outline:3px solid var(--focus); outline-offset:3px}
+
+/* ---- Controles ---- */
+.controls{display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:16px}
+.nav{
+  min-height:44px; padding:0 20px; border-radius:4px; cursor:pointer;
+  border:1.5px solid var(--btn-bg); background:var(--btn-bg); color:var(--btn-fg);
+  font:600 15px/1 var(--font-body);
+}
+.nav:disabled{opacity:.4; cursor:default}
+.status{flex:1 1 240px; max-width:420px; min-width:0; text-align:center; font-size:15px; color:var(--page-muted)}
+
+/* ---- Celular: páginas empilhadas ---- */
+@media (max-width:899px){
+  .controls{display:none}
+  body{justify-content:flex-start}
+  .book,.book.is-closed{width:100%; height:auto; display:flex; flex-direction:column; align-items:center; gap:20px; perspective:none; transform:none}
+  .leaf{display:contents}
+  .face,.face.endcover{
+    position:relative; inset:auto; left:auto; top:auto; width:min(100%, 520px); height:auto;
+    transform:none; backface-visibility:visible; -webkit-backface-visibility:visible; border-radius:5px; z-index:auto;
+  }
+  .back{transform:none}
+  .face::after,.face.endcover::after{display:none}
+  .inner{height:auto; min-height:112cqw}
+  .endcover .inner{min-height:80cqw}
+}
+@media (prefers-reduced-motion:reduce){
+  .book,.leaf{transition-duration:.01s}
+}
+</style>
+
+</head>
+<body>
+<main class="stage">
+  <div class="book is-closed" id="book" role="group" aria-label="Folder em formato de livro">
+
+    <div class="leaf">
+      <article class="face front on-green" aria-label="Capa">
+        <svg class="contour" viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+          <path d="M-20 60 C 80 30, 160 85, 240 55 S 360 25, 420 52"/>
+          <path d="M-20 100 C 80 70, 160 125, 240 95 S 360 65, 420 92"/>
+          <path d="M-20 140 C 80 110, 160 165, 240 135 S 360 105, 420 132"/>
+          <path d="M-20 180 C 80 150, 160 205, 240 175 S 360 145, 420 172"/>
+          <path d="M-20 220 C 80 190, 160 245, 240 215 S 360 185, 420 212"/>
+          <path d="M-20 260 C 80 230, 160 285, 240 255 S 360 225, 420 252"/>
+          <path d="M-20 300 C 80 270, 160 325, 240 295 S 360 265, 420 292"/>
+          <circle cx="280" cy="150" r="5"/>
+        </svg>
+        <div class="inner">
+          <div class="kicker">Geoprocessamento · Estudos ambientais</div>
+          <h1>Mapas e estudos ambientais para o seu licenciamento</h1>
+          <p class="sub">Cartografia, análise espacial e apoio técnico para quem precisa licenciar com segurança.</p>
+          <div class="who">
+            <b>Thayná Ingrid Pereira Teixeira</b>
+            <span>Engenheira Sanitarista e Ambiental</span>
+          </div>
+        </div>
+      </article>
+      <article class="face back" aria-label="Por que contratar">
+        <div class="inner">
+          <div class="kicker">Por que contratar</div>
+          <h2>Mapas feitos para o processo de licenciamento</h2>
+          <ul class="rows why">
+            <li><strong>Formação e registro</strong><span>Engenheira Sanitarista e Ambiental com CREA ativo.</span></li>
+            <li><strong>Vivência em licenciamento</strong><span>Atuação na gestão pública, em consultoria e em projetos de infraestrutura.</span></li>
+            <li><strong>Pensado para o órgão ambiental</strong><span>Mapas e estudos organizados para facilitar a análise técnica.</span></li>
+            <li><strong>Atendimento flexível</strong><span>Trabalho remoto, com disponibilidade para visitas e viagens.</span></li>
+          </ul>
+        </div>
+        <span class="folio l">2</span>
+      </article>
+    </div>
+
+    <div class="leaf">
+      <article class="face front" aria-label="Mapas e geoprocessamento">
+        <div class="inner">
+          <div class="kicker">Mapas</div>
+          <h2>Mapas e geoprocessamento</h2>
+          <ul class="rows services">
+            <li>Mapas de localização e situação do empreendimento</li>
+            <li>Uso e cobertura do solo</li>
+            <li>Áreas de preservação permanente (APP) e demais restrições ambientais</li>
+            <li>Sobreposição com unidades de conservação e outras áreas protegidas</li>
+            <li>Mapas temáticos para estudos e relatórios ambientais</li>
+          </ul>
+        </div>
+        <span class="folio r">3</span>
+      </article>
+      <article class="face back" aria-label="Estudos e licenciamento ambiental">
+        <div class="inner">
+          <div class="kicker">Estudos</div>
+          <h2>Estudos e licenciamento ambiental</h2>
+          <ul class="rows services">
+            <li>Caracterização e diagnóstico ambiental da área</li>
+            <li>Análise de viabilidade locacional, como em torres de telecomunicação</li>
+            <li>Apoio à instrução de processos de licenciamento ambiental</li>
+            <li>Acompanhamento de exigências e condicionantes dos órgãos ambientais</li>
+          </ul>
+        </div>
+        <span class="folio l">4</span>
+      </article>
+    </div>
+
+    <div class="leaf">
+      <article class="face front" aria-label="Como funciona">
+        <div class="inner">
+          <div class="kicker">Processo</div>
+          <h2>Como funciona</h2>
+          <ol class="steps">
+            <li><span class="n">1</span><span>Conversa inicial sobre o empreendimento e o que o órgão ambiental exige.</span></li>
+            <li><span class="n">2</span><span>Levantamento de dados e análise espacial da área.</span></li>
+            <li><span class="n">3</span><span>Elaboração dos mapas e estudos, com revisão técnica.</span></li>
+            <li><span class="n">4</span><span>Entrega em PDF e em arquivos georreferenciados, como shapefile e KML.</span></li>
+          </ol>
+          <div class="quote">
+            <b>Peça seu orçamento</b>
+            <span>Envie a localização e o tipo de empreendimento pelo WhatsApp, na página ao lado.</span>
+          </div>
+        </div>
+        <span class="folio r">5</span>
+      </article>
+      <article class="face back" aria-label="Contato">
+        <div class="inner">
+          <div class="kicker">Contato</div>
+          <h2>Vamos conversar sobre o seu projeto?</h2>
+          <p class="lead">Conte qual é o empreendimento e o que o órgão ambiental está pedindo. Retorno com orientação e orçamento.</p>
+          <a class="wa" href="https://wa.me/5591980127732?text=Ol%C3%A1%2C%20Thayn%C3%A1!%20Vi%20o%20seu%20folder%20e%20gostaria%20de%20pedir%20um%20or%C3%A7amento." target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.4-4.2A8 8 0 1 1 8.3 18.7L4 20z"/><path d="M9 9.5c.3 2.4 2.6 4.6 5 5l1.3-1.3-1.8-1-.9.7c-.8-.4-1.5-1.1-1.9-1.9l.7-.9-1-1.8L9 9.5z"/></svg>
+            <span>Chamar no WhatsApp</span>
+          </a>
+          <dl class="contact-list" style="margin:0">
+            <div><dt>WhatsApp</dt><dd>(91) 98012-7732</dd></div>
+            <div><dt>E-mail</dt><dd class="sel">eng.thayingrid@gmail.com</dd></div>
+          </dl>
+          <div class="who rule">
+            <b>Thayná Ingrid Pereira Teixeira</b>
+            <span>Engenheira Sanitarista e Ambiental</span>
+          </div>
+        </div>
+        <span class="folio l">6</span>
+      </article>
+    </div>
+
+    <article class="face endcover on-green" aria-label="Contracapa">
+      <svg class="contour" viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <path d="M-20 60 C 80 30, 160 85, 240 55 S 360 25, 420 52"/>
+        <path d="M-20 100 C 80 70, 160 125, 240 95 S 360 65, 420 92"/>
+        <path d="M-20 140 C 80 110, 160 165, 240 135 S 360 105, 420 132"/>
+        <path d="M-20 180 C 80 150, 160 205, 240 175 S 360 145, 420 172"/>
+        <path d="M-20 220 C 80 190, 160 245, 240 215 S 360 185, 420 212"/>
+        <path d="M-20 260 C 80 230, 160 285, 240 255 S 360 225, 420 252"/>
+        <path d="M-20 300 C 80 270, 160 325, 240 295 S 360 265, 420 292"/>
+        <circle cx="120" cy="190" r="5"/>
+      </svg>
+      <div class="inner">
+        <div class="kicker">Mapas e estudos ambientais</div>
+        <div class="who">
+          <b>Thayná Ingrid Pereira Teixeira</b>
+          <span>Engenheira Sanitarista e Ambiental</span>
+        </div>
+      </div>
+    </article>
+  </div>
+</main>
+
+<div class="controls">
+  <button class="nav" id="prev" type="button">Página anterior</button>
+  <div class="status" id="status" aria-live="polite">Capa</div>
+  <button class="nav" id="next" type="button">Próxima página</button>
+</div>
+
+<script>
+(function () {
+  var book = document.getElementById('book');
+  var leaves = [].slice.call(book.querySelectorAll('.leaf'));
+  var faces = [].slice.call(book.querySelectorAll('.face'));
+  var endcover = book.querySelector('.endcover');
+  var prev = document.getElementById('prev');
+  var next = document.getElementById('next');
+  var status = document.getElementById('status');
+  var N = leaves.length;
+  var labels = ['Capa', 'Por que contratar · Mapas e geoprocessamento', 'Estudos e licenciamento · Como funciona', 'Contato'];
+  var mq = window.matchMedia('(min-width: 900px)');
+  var c = 0;
+  var timer = null;
+
+  function settleZ() {
+    leaves.forEach(function (l, i) { l.style.zIndex = i < c ? (i + 1) : (N - i); });
+  }
+  function render() {
+    leaves.forEach(function (l, i) { l.classList.toggle('flipped', i < c); });
+    book.classList.toggle('is-closed', c === 0);
+    prev.disabled = c === 0;
+    next.disabled = c === N;
+    status.textContent = labels[c];
+    var visible = [];
+    if (c >= 1) visible.push(leaves[c - 1].querySelector('.back'));
+    visible.push(c < N ? leaves[c].querySelector('.front') : endcover);
+    faces.forEach(function (f) {
+      var hide = mq.matches && visible.indexOf(f) === -1;
+      if (hide) f.setAttribute('inert', ''); else f.removeAttribute('inert');
+    });
+  }
+  function go(dir) {
+    var t = c + dir;
+    if (t < 0 || t > N) return;
+    var leaf = leaves[dir > 0 ? c : c - 1];
+    leaf.style.zIndex = 100;
+    c = t;
+    render();
+    clearTimeout(timer);
+    timer = setTimeout(settleZ, 950);
+  }
+  prev.addEventListener('click', function () { go(-1); });
+  next.addEventListener('click', function () { go(1); });
+  document.addEventListener('keydown', function (e) {
+    if (!mq.matches) return;
+    if (e.key === 'ArrowRight') go(1);
+    if (e.key === 'ArrowLeft') go(-1);
+  });
+  var x0 = null;
+  book.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
+  book.addEventListener('pointerup', function (e) {
+    if (x0 === null || !mq.matches) { x0 = null; return; }
+    var dx = e.clientX - x0;
+    x0 = null;
+    if (dx < -60) go(1);
+    else if (dx > 60) go(-1);
+  });
+  if (mq.addEventListener) mq.addEventListener('change', render); else if (mq.addListener) mq.addListener(render);
+  settleZ();
+  render();
+})();
+</script>
+
+</body>
+</html>
